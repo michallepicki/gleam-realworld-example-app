@@ -15,22 +15,6 @@ pub fn reset_database(name) {
   Nil
 }
 
-fn atom_(atom_name) {
-  atom.create_from_string(atom_name)
-}
-
-external fn erl_query(
-  String,
-  List(pgo.PgType),
-  map.Map(atom.Atom, atom.Atom),
-) -> Dynamic =
-  "pgo" "query"
-
-fn db_management_query_options() {
-  map.new()
-  |> map.insert(atom_("pool"), atom_("db_management_pool"))
-}
-
 pub fn run_db_management_pool() {
   assert Ok(_) =
     pgo.start_link(
@@ -63,11 +47,6 @@ pub fn create_database(name) {
   io.println("Database has been created!")
 }
 
-fn conduit_db_query_options() {
-  map.new()
-  |> map.insert(atom_("pool"), atom_("default"))
-}
-
 pub fn run_conduit_db_pool(name) {
   assert Ok(_) =
     pgo.start_link(
@@ -80,40 +59,6 @@ pub fn run_conduit_db_pool(name) {
       ],
     )
   io.println("Counduit database connection pool is running!")
-}
-
-type Migration {
-  Migration(id: String, function: fn() -> Nil)
-}
-
-fn migrations() {
-  [
-    Migration(
-      "create users table",
-      fn() {
-        erl_query(
-          "CREATE TABLE users (
-              id bigint NOT NULL PRIMARY KEY,
-              email text NOT NULL,
-              username text NOT NULL
-            )",
-          [],
-          conduit_db_query_options(),
-        )
-        erl_query(
-          "CREATE SEQUENCE users_id_seq OWNED BY users.id",
-          [],
-          conduit_db_query_options(),
-        )
-        erl_query(
-          "ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass)",
-          [],
-          conduit_db_query_options(),
-        )
-        Nil
-      },
-    ),
-  ]
 }
 
 pub fn migrate_database() {
@@ -151,4 +96,59 @@ pub fn migrate_database() {
 
   io.println("Database has been set up!")
   Nil
+}
+
+fn atom_(atom_name) {
+  atom.create_from_string(atom_name)
+}
+
+external fn erl_query(
+  String,
+  List(pgo.PgType),
+  map.Map(atom.Atom, atom.Atom),
+) -> Dynamic =
+  "pgo" "query"
+
+fn db_management_query_options() {
+  map.new()
+  |> map.insert(atom_("pool"), atom_("db_management_pool"))
+}
+
+fn conduit_db_query_options() {
+  map.new()
+  |> map.insert(atom_("pool"), atom_("default"))
+}
+
+type Migration {
+  Migration(id: String, function: fn() -> Nil)
+}
+
+fn migrations() {
+  [
+    Migration(
+      "create users table",
+      fn() {
+        erl_query(
+          "CREATE TABLE users (
+              id bigint NOT NULL PRIMARY KEY,
+              email text NOT NULL,
+              username text NOT NULL
+            )",
+          [],
+          conduit_db_query_options(),
+        )
+        erl_query(
+          "CREATE SEQUENCE users_id_seq OWNED BY users.id",
+          [],
+          conduit_db_query_options(),
+        )
+        erl_query(
+          "ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass)",
+          [],
+          conduit_db_query_options(),
+        )
+        Nil
+      },
+    ),
+  ]
 }
