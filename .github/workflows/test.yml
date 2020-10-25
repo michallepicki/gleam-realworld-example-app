@@ -38,6 +38,16 @@ jobs:
           curl -Lo bin/rebar3 https://s3.amazonaws.com/rebar3/rebar3
           chmod +x bin/rebar3
 
+      - name: Handle deps caching
+        id: cache-deps
+        uses: actions/cache@v1
+        with:
+          path: _build
+          key: 0.12.0-rc3-{{ hashFiles('rebar.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: rebar3 get-deps
+
       - run: gleam format --check src test
-      - run: rebar3 install_deps
       - run: rebar3 eunit
