@@ -63,7 +63,12 @@ pub fn run_conduit_db_pool(name) {
   assert Ok(_) =
     pgo.start_link(
       atom_("default"),
-      [pgo.User("postgres"), pgo.Password("postgres"), pgo.Database(name)],
+      [
+        pgo.Host("postgres"),
+        pgo.User("postgres"),
+        pgo.Password("postgres"),
+        pgo.Database(name),
+      ],
     )
   io.println("Counduit database connection pool is running!")
 }
