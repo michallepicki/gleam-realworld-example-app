@@ -23,7 +23,7 @@ jobs:
       - run: apk add curl tar
       - name: Install gleam
         run: |
-          GLEAM_VERSION=0.12.0-rc3 curl -Lo bin/gleam.tar.gz "https://github.com/gleam-lang/gleam/releases/download/v$GLEAM_VERSION/gleam-v$GLEAM_VERSION-linux-amd64.tar.gz"
+          GLEAM_VERSION=0.12.0-rc3 eval 'curl -Lo bin/gleam.tar.gz "https://github.com/gleam-lang/gleam/releases/download/v$GLEAM_VERSION/gleam-v$GLEAM_VERSION-linux-amd64.tar.gz"'
           tar -xf bin/gleam.tar.gz -C bin
           rm bin/gleam.tar.gz
       - name: Install rebar3
