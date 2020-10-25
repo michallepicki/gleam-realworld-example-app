@@ -29,6 +29,7 @@ jobs:
       - name: Install rebar3
         run: |
           curl -Lo bin/rebar3 https://s3.amazonaws.com/rebar3/rebar3
+          chmod +x bin/rebar3
       - run: gleam format --check src test
       - run: rebar3 install_deps
       - run: rebar3 eunit
