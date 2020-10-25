@@ -6,6 +6,15 @@ import gleam/map
 import gleam/list
 import gleam/dynamic.{Dynamic}
 
+pub fn reset_database(name) {
+  run_db_management_pool()
+  drop_database(name)
+  create_database(name)
+  run_conduit_db_pool(name)
+  migrate_database()
+  Nil
+}
+
 fn atom_(atom_name) {
   atom.create_from_string(atom_name)
 }
@@ -141,14 +150,5 @@ pub fn migrate_database() {
   })
 
   io.println("Database has been set up!")
-  Nil
-}
-
-pub fn reset_database(name) {
-  run_db_management_pool()
-  drop_database(name)
-  create_database(name)
-  run_conduit_db_pool(name)
-  migrate_database()
   Nil
 }
