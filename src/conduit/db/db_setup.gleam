@@ -26,7 +26,7 @@ pub fn run_db_management_pool() {
   assert Ok(_) =
     pgo.start_link(
       atom_("db_management_pool"),
-      [pgo.User("postgres"), pgo.Password("postgres"), pgo.Database("postgres")],
+      [pgo.Host("postgres"), pgo.User("postgres"), pgo.Password("postgres"), pgo.Database("postgres")],
     )
   io.println("Database management connection pool is running!")
 }
