@@ -16,18 +16,18 @@ Compile:
 rebar3 compile
 ```
 
-Set up the database for development:
-```
-$ rebar3 shell --apps pgo
-1> 'conduit@db@db_setup':reset_database(<<"conduit_dev"/utf8>>).
+Run tests:
+```sh
+rebar3 eunit
 ```
 
 For tests, the test database will be automatically re-set
 before running the tests.
 
-Run tests:
-```sh
-rebar3 eunit
+Set up the database for development:
+```
+$ rebar3 shell --apps pgo
+1> 'conduit@db@db_setup':reset_database(<<"conduit_dev"/utf8>>).
 ```
 
 Run the app with access to the Erlang REPL:
