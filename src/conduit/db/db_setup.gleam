@@ -5,6 +5,9 @@ import gleam/string
 import gleam/map
 import gleam/list
 import gleam/dynamic.{Dynamic}
+import gleam/os
+import gleam/result
+import gleam/int
 
 pub fn reset_database(name) {
   run_db_management_pool()
@@ -16,14 +19,13 @@ pub fn reset_database(name) {
 }
 
 pub fn run_db_management_pool() {
+  let db_credentials = get_db_credentials()
   assert Ok(_) =
     pgo.start_link(
       atom_("db_management_pool"),
       [
-        pgo.Host("postgres"),
-        pgo.User("postgres"),
-        pgo.Password("postgres"),
         pgo.Database("postgres"),
+        ..db_credentials
       ],
     )
   io.println("Database management connection pool is running!")
@@ -48,14 +50,13 @@ pub fn create_database(name) {
 }
 
 pub fn run_conduit_db_pool(name) {
+  let db_credentials = get_db_credentials()
   assert Ok(_) =
     pgo.start_link(
       atom_("default"),
       [
-        pgo.Host("postgres"),
-        pgo.User("postgres"),
-        pgo.Password("postgres"),
         pgo.Database(name),
+        ..db_credentials
       ],
     )
   io.println("Counduit database connection pool is running!")
@@ -96,6 +97,21 @@ pub fn migrate_database() {
 
   io.println("Database has been set up!")
   Nil
+}
+
+fn get_db_credentials() {
+  let env = os.get_env()
+  let host = map.get(env, "POSTGRES_HOST") |> result.unwrap("localhost")
+  let port_string = map.get(env, "POSTGRES_PORT") |> result.unwrap("5432")
+  let port = int.parse(port_string) |> result.unwrap(5432)
+  let user = map.get(env, "POSTGRES_USER") |> result.unwrap("postgres")
+  let password = map.get(env, "POSTGRES_PASSWORD") |> result.unwrap("postgres")
+  [
+    pgo.Host(host),
+    pgo.Port(port),
+    pgo.User(user),
+    pgo.Password(password)
+  ]
 }
 
 fn atom_(atom_name) {

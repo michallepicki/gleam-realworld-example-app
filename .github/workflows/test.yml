@@ -50,6 +50,8 @@ jobs:
         run: rebar3 get-deps
 
       - run: rebar3 eunit
+        env:
+          POSTGRES_HOST: postgres
 
       - if: ${{ always() }}
         run: gleam format --check src test
