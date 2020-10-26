@@ -12,6 +12,11 @@ stop(_State) ->
     ok.
 
 init([]) ->
+    PostgresHost = os:getenv("POSTGRES_HOST","localhost"),
+    PostgresPortString = os:getenv("POSTGRES_PORT","5432"),
+    PostgresPort = list_to_integer(PostgresPortString),
+    PostgresUser = os:getenv("POSTGRES_USER","postgres"),
+    PostgresPassword = os:getenv("POSTGRES_PASSWORD","postgres"),
     SupFlags = #{strategy => one_for_all},
     ChildSpecs = [
         #{
@@ -21,7 +26,13 @@ init([]) ->
         },
         #{
            id => conduit_pgo_pool,
-           start => {pgo_pool, start_link, [default, #{user => "postgres", password => "postgres", database => "conduit_dev"}]},
+           start => {pgo_pool, start_link, [default, #{
+               host => PostgresHost,
+               port => PostgresPort,
+               user => PostgresUser,
+               password => PostgresPassword,
+               database => "conduit_dev"
+            }]},
            shutdown => 1000
         }
     ],
