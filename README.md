@@ -34,3 +34,13 @@ Run the app with access to the Erlang REPL:
 ```sh
 rebar3 shell
 ```
+
+# Database credentials
+
+By default, the application will try to access `postgresql://postgres:postgres@localhost:5432`. You can customize this with:
+```
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=postgres
+```
