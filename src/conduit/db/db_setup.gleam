@@ -19,41 +19,40 @@ pub fn reset_database(name) {
 }
 
 pub fn run_db_management_pool() {
+  io.println("Running the database management connection pool")
   let db_credentials = get_db_credentials()
-  assert Ok(_) =
-    pgo.start_link(
-      atom_("db_management_pool"),
-      [pgo.Database("postgres"), ..db_credentials],
-    )
-  io.println("Database management connection pool is running!")
+  pgo.start_link(
+    atom_("db_management_pool"),
+    [pgo.Database("postgres"), ..db_credentials],
+  )
 }
 
 pub fn drop_database(name) {
+  io.println("Dropping the database")
   erl_query(
     string.concat(["DROP DATABASE \"", name, "\""]),
     [],
     db_management_query_options(),
   )
-  io.println("Database has been dropped!")
 }
 
 pub fn create_database(name) {
+  io.println("Creating the database")
   erl_query(
     string.concat(["CREATE DATABASE \"", name, "\" ENCODING 'UTF8'"]),
     [],
     db_management_query_options(),
   )
-  io.println("Database has been created!")
 }
 
 pub fn run_conduit_db_pool(name) {
+  io.println("Running counduit database connection pool")
   let db_credentials = get_db_credentials()
-  assert Ok(_) =
-    pgo.start_link(atom_("default"), [pgo.Database(name), ..db_credentials])
-  io.println("Counduit database connection pool is running!")
+  pgo.start_link(atom_("default"), [pgo.Database(name), ..db_credentials])
 }
 
 pub fn migrate_database() {
+  io.println("Migrating the database")
   erl_query(
     "CREATE TABLE IF NOT EXISTS schema_migrations (id text PRIMARY KEY)",
     [],
@@ -85,9 +84,6 @@ pub fn migrate_database() {
       }
     }
   })
-
-  io.println("Database has been set up!")
-  Nil
 }
 
 fn get_db_credentials() {
