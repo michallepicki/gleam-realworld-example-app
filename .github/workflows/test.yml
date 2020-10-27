@@ -45,6 +45,8 @@ jobs:
           path: _build
           key: 0.12.0-rc3-${{ hashFiles('rebar.lock') }}
 
+      - run: apk add git
+
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: rebar3 get-deps
