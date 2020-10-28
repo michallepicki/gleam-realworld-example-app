@@ -5,7 +5,7 @@
  {<<"gleam_http">>,{pkg,<<"gleam_http">>,<<"1.5.0">>},0},
  {<<"gleam_json">>,{pkg,<<"gleam_json">>,<<"0.1.0">>},0},
  {<<"gleam_otp">>,
-  {git,"https://github.com/gleam-lang/otp",
+  {git,"https://github.com/gleam-lang/otp.git",
        {ref,"c4dc57a61d408f3f654e77372b63a77eb66ce2c6"}},
   0},
  {<<"gleam_pgo">>,{pkg,<<"gleam_pgo">>,<<"0.1.0">>},0},

@@ -26,12 +26,13 @@ jobs:
         uses: actions/cache@v1
         with:
           path: bin
-          key: 0.12.0-rc3
+          key: 0.12.0-rc3-cache-DONTMATCH
 
-      - name: Install gleam and rebar3
+      - name: Install gleam, rebar3 and git
         if: steps.cache-gleam-rebar3.outputs.cache-hit != 'true'
         run: |
-          apk add curl tar
+          apk add curl tar git
+          echo `which git`
           GLEAM_VERSION=0.12.0-rc3 eval 'curl -Lo bin/gleam.tar.gz "https://github.com/gleam-lang/gleam/releases/download/v$GLEAM_VERSION/gleam-v$GLEAM_VERSION-linux-amd64.tar.gz"'
           tar -xf bin/gleam.tar.gz -C bin
           rm bin/gleam.tar.gz
@@ -44,9 +45,6 @@ jobs:
         with:
           path: _build
           key: 0.12.0-rc3-${{ hashFiles('rebar.lock') }}
-
-      - name: Install git because rebar3 is annoying and cannot be asked to only do one thing
-        run: apk add git
 
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
