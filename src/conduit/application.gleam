@@ -1,4 +1,4 @@
-import gleam/otp/supervisor.{ApplicationStartMode, ErlangStartResult}
+import gleam/otp/supervisor
 import gleam/otp/actor
 import gleam/otp/process
 import gleam/dynamic.{Dynamic}
@@ -23,9 +23,9 @@ fn init(children) {
 }
 
 pub fn start(
-  _mode: ApplicationStartMode,
+  _mode: supervisor.ApplicationStartMode,
   _args: List(Dynamic),
-) -> ErlangStartResult {
+) -> supervisor.ErlangStartResult {
   init
   |> supervisor.start
   |> supervisor.to_erlang_start_result
