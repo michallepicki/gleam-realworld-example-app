@@ -1,8 +1,6 @@
 import gleam/http.{Request, Response}
 import gleam/bit_string
 import gleam/bit_builder.{BitBuilder}
-import gleam/json
-import gleam/string
 import typed_json
 import conduit/user
 
@@ -56,10 +54,10 @@ fn check_utf8_encoding(
 fn parse_json(
   request: Request(String),
 ) -> Result(Request(typed_json.TypedJson), Response(String)) {
-  case json.decode(request.body) {
-    Ok(json_data) ->
+  case typed_json.decode(request.body) {
+    Ok(json) ->
       request
-      |> http.set_req_body(typed_json.from_json(json_data))
+      |> http.set_req_body(json)
       |> Ok()
     Error(_) ->
       http.response(400)

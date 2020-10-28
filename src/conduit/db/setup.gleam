@@ -8,6 +8,7 @@ import gleam/dynamic.{Dynamic}
 import gleam/os
 import gleam/result
 import gleam/int
+import conduit/db
 
 pub fn reset_database(name) {
   run_db_management_pool()
@@ -60,7 +61,7 @@ pub fn migrate_database() {
   )
 
   assert Ok(tuple(_, _, rows)) =
-    pgo.query(atom_("default"), "SELECT id FROM schema_migrations", [])
+    db.query("SELECT id FROM schema_migrations", [])
   let already_ran_migrations =
     rows
     |> list.map(fn(row) {
@@ -75,8 +76,7 @@ pub fn migrate_database() {
       True -> Nil
       False -> {
         assert Ok(_) =
-          pgo.query(
-            atom_("default"),
+          db.query(
             "INSERT INTO schema_migrations(id) VALUES ($1)",
             [pgo.text(migration_id)],
           )

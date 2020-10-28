@@ -3,7 +3,7 @@ import gleam/otp/actor
 import gleam/otp/process
 import gleam/dynamic.{Dynamic}
 import gleam/http/elli
-import conduit/db/db_setup
+import conduit/db/setup as db_setup
 import conduit
 
 fn init(children) {

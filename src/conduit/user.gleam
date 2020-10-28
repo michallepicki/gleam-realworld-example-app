@@ -1,15 +1,12 @@
-import gleam/dynamic
-import gleam/int
-import gleam/atom
 import gleam/string
 import gleam/pgo
 import gleam/option.{None, Option, Some}
 import gleam/regex
-import gleam/list
 import gleam/http.{Request, Response}
 import gleam/json
 import typed_json.{JsonObject, JsonString, TypedJson}
 import validation
+import conduit/db
 
 type User {
   User(
@@ -37,8 +34,7 @@ pub fn registration(
     )
 
   assert Ok(_) =
-    pgo.query(
-      atom.create_from_string("default"),
+    db.query(
       "insert into users (email, username) values ($1 , $2)",
       [pgo.text(user.email), pgo.text(user.username)],
     )

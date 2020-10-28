@@ -16,7 +16,12 @@ pub type TypedJson {
   JsonObject(v: List(tuple(String, TypedJson)))
 }
 
-pub fn from_json(json_data: Json) -> TypedJson {
+pub fn decode(data: String) -> Result(TypedJson, Dynamic) {
+  try json_data = json.decode(data)
+  Ok(from_json(json_data))
+}
+
+pub fn from_json(json_data) {
   type_json_data(dynamic.from(json_data))
 }
 

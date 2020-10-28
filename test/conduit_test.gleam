@@ -1,15 +1,13 @@
-import conduit
-import conduit/db/db_setup
 import gleam/should
 import gleam/http.{Get, Https, Post, Request}
 import gleam/bit_builder
 import gleam/bit_string
-import gleam/option.{None}
-import gleam/string
 import gleam/atom.{Atom}
 import gleam/dynamic.{Dynamic}
 import gleam/json
-import gleam/pgo
+import conduit
+import conduit/db
+import conduit/db/setup as db_setup
 
 pub fn conduit_test_() {
   assert Ok(setup) = atom.from_string("setup")
@@ -106,7 +104,7 @@ fn registration_test() {
   assert Ok("some_username") = dynamic.string(username)
 
   assert Ok(tuple(_, 1, [db_user])) =
-    pgo.query(atom_("default"), "SELECT email, username FROM users", [])
+    db.query("SELECT email, username FROM users", [])
 
   assert Ok(db_email_dynamic) = dynamic.element(db_user, 0)
   assert Ok(db_email) = dynamic.string(db_email_dynamic)
@@ -119,10 +117,6 @@ fn registration_test() {
   |> should.equal("some_username")
 
   Nil
-}
-
-fn atom_(atom_name) {
-  atom.create_from_string(atom_name)
 }
 
 fn default_request() {
