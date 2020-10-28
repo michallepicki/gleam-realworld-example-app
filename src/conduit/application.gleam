@@ -4,7 +4,7 @@ import gleam/otp/process
 import gleam/dynamic.{Dynamic}
 import gleam/http/elli
 import conduit/db
-import conduit
+import conduit/web
 
 fn init(children) {
   children
@@ -15,7 +15,7 @@ fn init(children) {
     }
   }))
   |> supervisor.add(supervisor.worker(fn(_args) {
-    case elli.start(conduit.service, on_port: 3000) {
+    case elli.start(web.service, on_port: 3000) {
       Ok(pid) -> Ok(process.null_sender(pid))
       Error(reason) -> Error(actor.InitCrashed(reason))
     }

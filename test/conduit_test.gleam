@@ -5,7 +5,7 @@ import gleam/bit_string
 import gleam/atom.{Atom}
 import gleam/dynamic.{Dynamic}
 import gleam/json
-import conduit
+import conduit/web
 import conduit/db
 
 pub fn conduit_test_() {
@@ -55,9 +55,7 @@ fn not_found_test() {
   let request =
     Request(..default_request, path: "asd/fa/sdfso/me/rando/mst/ring")
 
-  let response =
-    request
-    |> conduit.service()
+  let response = web.service(request)
 
   response.status
   |> should.equal(404)
@@ -85,7 +83,7 @@ fn registration_test() {
       >>,
       path: "api/users",
     )
-  let response = conduit.service(request)
+  let response = web.service(request)
 
   response.status
   |> should.equal(200)

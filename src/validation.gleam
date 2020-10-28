@@ -43,9 +43,7 @@ fn apply_result(
     Ok(f), Ok(x) -> Ok(f(x))
     Ok(_), Error(errors) -> Error(errors)
     Error(errors), Ok(_) -> Error(errors)
-    Error(errors1), Error(errors2) ->
-      errors_joiner(errors1, errors2)
-      |> Error()
+    Error(errors1), Error(errors2) -> Error(errors_joiner(errors1, errors2))
   }
 }
 
