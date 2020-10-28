@@ -1,9 +1,10 @@
-import gleam/dynamic.{Dynamic}
+import gleam/json.{Json}
 import gleam/atom
 import gleam/list
 import gleam/map
 import gleam/string
-import gleam/json.{Json}
+import gleam/dynamic.{Dynamic}
+import gleam/option.{None, Option, Some}
 
 pub type TypedJson {
   JsonNull
@@ -13,6 +14,30 @@ pub type TypedJson {
   JsonString(v: String)
   JsonArray(v: List(TypedJson))
   JsonObject(v: List(tuple(String, TypedJson)))
+}
+
+pub fn from_json(json_data: Json) -> TypedJson {
+  type_json_data(dynamic.from(json_data))
+}
+
+pub fn object_fetch(json_object: TypedJson, key: String) -> Option(TypedJson) {
+  case filter_object(json_object, [key]) {
+    JsonObject([tuple(_, value)]) -> Some(value)
+    _ -> None
+  }
+}
+
+fn filter_object(json_object: TypedJson, keys: List(String)) -> TypedJson {
+  case json_object {
+    JsonObject(tuple_list) ->
+      tuple_list
+      |> list.filter(fn(entry) {
+        let tuple(key, _value) = entry
+        list.contains(keys, key)
+      })
+      |> JsonObject()
+    _ -> json_object
+  }
 }
 
 fn type_json_data(data: Dynamic) -> TypedJson {
@@ -57,22 +82,5 @@ fn type_json_data(data: Dynamic) -> TypedJson {
               }
           }
       }
-  }
-}
-
-pub fn from_json(json_data: Json) -> TypedJson {
-  type_json_data(dynamic.from(json_data))
-}
-
-pub fn filter_object(json_object: TypedJson, keys: List(String)) -> TypedJson {
-  case json_object {
-    JsonObject(tuple_list) ->
-      tuple_list
-      |> list.filter(fn(entry) {
-        let tuple(key, _value) = entry
-        list.contains(keys, key)
-      })
-      |> JsonObject()
-    _ -> json_object
   }
 }
