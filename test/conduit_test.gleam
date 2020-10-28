@@ -7,7 +7,6 @@ import gleam/dynamic.{Dynamic}
 import gleam/json
 import conduit
 import conduit/db
-import conduit/db/setup as db_setup
 
 pub fn conduit_test_() {
   assert Ok(setup) = atom.from_string("setup")
@@ -17,7 +16,7 @@ pub fn conduit_test_() {
 fn top_setup() {
   assert Ok(pgo) = atom.from_string("pgo")
   application_ensure_all_started(pgo)
-  db_setup.reset_database("conduit_test")
+  db.reset("conduit_test")
   Nil
 }
 
