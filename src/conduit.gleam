@@ -32,9 +32,9 @@ fn router(
   let path_segments = http.path_segments(request)
   case request.method, path_segments {
     http.Post, ["api", "users"] -> {
-      try string_body = check_utf8_encoding(request)
-      try json_body = parse_json(string_body)
-      user_registration(json_body)
+      try string_request = check_utf8_encoding(request)
+      try json_request = parse_json(string_request)
+      user_registration(json_request)
     }
     _, _ -> not_found()
   }
@@ -48,9 +48,12 @@ fn not_found() -> Result(Response(String), Response(String)) {
 
 fn check_utf8_encoding(
   request: Request(BitString),
-) -> Result(String, Response(String)) {
+) -> Result(Request(String), Response(String)) {
   case bit_string.to_string(request.body) {
-    Ok(body) -> Ok(body)
+    Ok(body) ->
+      request
+      |> http.set_req_body(body)
+      |> Ok()
     Error(_) ->
       http.response(400)
       |> http.set_resp_body(
@@ -60,9 +63,14 @@ fn check_utf8_encoding(
   }
 }
 
-fn parse_json(string_body: String) -> Result(TypedJson, Response(String)) {
-  case json.decode(string_body) {
-    Ok(json_data) -> Ok(typed_json.from_json(json_data))
+fn parse_json(
+  request: Request(String),
+) -> Result(Request(TypedJson), Response(String)) {
+  case json.decode(request.body) {
+    Ok(json_data) ->
+      request
+      |> http.set_req_body(typed_json.from_json(json_data))
+      |> Ok()
     Error(_) ->
       http.response(400)
       |> http.set_resp_body("Could not parse the json body")
@@ -81,10 +89,10 @@ type User {
 }
 
 fn user_registration(
-  registration_json: TypedJson,
+  request: Request(TypedJson),
 ) -> Result(Response(String), Response(String)) {
   try RegistrationParams(user_email, _user_password, user_username) =
-    read_registration_params(registration_json)
+    read_registration_params(request.body)
 
   let user =
     User(
