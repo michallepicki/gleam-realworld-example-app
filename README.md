@@ -1,6 +1,6 @@
 > ### WORK IN PROGRESS Gleam + Elli + PGO codebase containing real world examples (CRUD, auth, advanced patterns, etc) that WILL adhere to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
-This codebase was created to demonstrate a fully fledged fullstack application built with Gleam including CRUD operations, authentication, routing, pagination, and more. Some day, hopefully, this will be the case!
+This codebase was created to demonstrate a fully fledged fullstack application built with [Gleam](https://gleam.run) including CRUD operations, authentication, routing, pagination, and more. Some day, hopefully, this will be the case!
 
 For more information on how to this will work with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
 
