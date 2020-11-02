@@ -38,9 +38,6 @@ jobs:
           curl -Lo bin/rebar3 https://s3.amazonaws.com/rebar3/rebar3
           chmod +x bin/rebar3
 
-      - name: Install git because rebar3 is annoying and cannot be asked to only do one thing
-        run: apk add git
-
       - name: Handle deps caching
         id: cache-deps
         uses: actions/cache@v1

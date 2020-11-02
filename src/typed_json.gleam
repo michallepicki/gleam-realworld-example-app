@@ -1,4 +1,4 @@
-import gleam/json.{Json}
+import gleam/json
 import gleam/atom
 import gleam/list
 import gleam/map
