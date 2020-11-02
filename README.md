@@ -44,3 +44,13 @@ export POSTGRES_PORT=5432
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=postgres
 ```
+
+# TODO:
+- [ ] jwt tokens handling using the jose library
+- [ ] hashing passwords, configuring salt, document generating salt
+- [ ] build release in a separate github actions workflow, run integration tests against it (`test/run-api-tests.sh`)
+- [ ] articles crud
+- [ ] articles tags
+- [ ] following users
+
+... and many more. These are just examples of things missing. Feel free to send PRs for any of them, I'm doing this just to learn Gleam in my spare time so the more the merrier!
