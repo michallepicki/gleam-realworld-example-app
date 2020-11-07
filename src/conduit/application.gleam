@@ -1,3 +1,4 @@
+import gleam/result
 import gleam/otp/supervisor
 import gleam/otp/actor
 import gleam/otp/process
@@ -8,29 +9,23 @@ import conduit/web
 
 fn init(children) {
   children
-  |> supervisor.add(supervisor.worker(fn(_args) {
-    case db.run_pool("conduit_dev") {
-      Ok(pid) -> Ok(process.null_sender(pid))
-      Error(reason) -> Error(actor.InitCrashed(reason))
-    }
+  |> supervisor.add(supervisor.supervisor(fn(_args) {
+    supervisor.wrap_erlang_start_result(db.run_pool("conduit_dev"))
   }))
-  |> supervisor.add(supervisor.worker(fn(_args) {
-    case elli.start(web.service, on_port: 3000) {
-      Ok(pid) -> Ok(process.null_sender(pid))
-      Error(reason) -> Error(actor.InitCrashed(reason))
-    }
+  |> supervisor.add(supervisor.supervisor(fn(_args) {
+    elli.start(web.service, on_port: 3000)
   }))
 }
 
 pub fn start(
   _mode: supervisor.ApplicationStartMode,
   _args: List(Dynamic),
-) -> supervisor.ErlangStartResult {
+) -> Result(process.Pid, actor.StartError) {
   init
   |> supervisor.start
-  |> supervisor.to_erlang_start_result
+  |> result.map(process.pid)
 }
 
-pub fn stop(_state: Dynamic) {
+pub fn stop(_state: Dynamic) -> supervisor.ApplicationStop {
   supervisor.application_stopped()
 }
