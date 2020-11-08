@@ -8,6 +8,7 @@ import gleam/dynamic.{Dynamic}
 import gleam/os
 import gleam/result
 import gleam/int
+import gleam/otp/supervisor
 
 pub fn query(sql, arguments) {
   pgo.query(atom_("default"), sql, arguments)
@@ -52,7 +53,10 @@ pub fn create(name) {
 pub fn run_pool(name) {
   io.println("Running counduit database connection pool")
   let db_credentials = get_db_credentials()
-  pgo.start_link(atom_("default"), [pgo.Database(name), ..db_credentials])
+  supervisor.from_erlang_start_result(pgo.start_link(
+    atom_("default"),
+    [pgo.Database(name), ..db_credentials],
+  ))
 }
 
 pub fn migrate() {

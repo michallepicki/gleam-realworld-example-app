@@ -10,7 +10,7 @@ import conduit/web
 fn init(children) {
   children
   |> supervisor.add(supervisor.supervisor(fn(_args) {
-    supervisor.wrap_erlang_start_result(db.run_pool("conduit_dev"))
+    db.run_pool("conduit_dev")
   }))
   |> supervisor.add(supervisor.supervisor(fn(_args) {
     elli.start(web.service, on_port: 3000)
