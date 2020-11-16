@@ -26,13 +26,13 @@ jobs:
         uses: actions/cache@v1
         with:
           path: bin
-          key: 0.12.0
+          key: 0.12.1
 
       - name: Install gleam and rebar3
         if: steps.cache-gleam-rebar3.outputs.cache-hit != 'true'
         run: |
           apk add curl tar
-          GLEAM_VERSION=0.12.0 eval 'curl -Lo bin/gleam.tar.gz "https://github.com/gleam-lang/gleam/releases/download/v$GLEAM_VERSION/gleam-v$GLEAM_VERSION-linux-amd64.tar.gz"'
+          GLEAM_VERSION=0.12.1 eval 'curl -Lo bin/gleam.tar.gz "https://github.com/gleam-lang/gleam/releases/download/v$GLEAM_VERSION/gleam-v$GLEAM_VERSION-linux-amd64.tar.gz"'
           tar -xf bin/gleam.tar.gz -C bin
           rm bin/gleam.tar.gz
           curl -Lo bin/rebar3 https://s3.amazonaws.com/rebar3/rebar3
@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: _build
-          key: 0.12.0-${{ hashFiles('rebar.lock') }}
+          key: 0.12.1-${{ hashFiles('rebar.lock') }}
 
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
