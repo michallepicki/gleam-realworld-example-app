@@ -4,7 +4,8 @@ import gleam/bit_builder
 import gleam/bit_string
 import gleam/atom.{Atom}
 import gleam/dynamic.{Dynamic}
-import gleam/json
+import gleam/option.{Some}
+import conduit/json
 import conduit/web
 import conduit/db
 
@@ -93,12 +94,13 @@ fn registration_test() {
     |> bit_string.to_string()
   // debug_user_print_string(response_body)
   assert Ok(data) = json.decode(response_body)
-  let data = dynamic.from(data)
-  assert Ok(user_response) = dynamic.field(data, "user")
-  assert Ok(email) = dynamic.field(user_response, "email")
-  assert Ok("user@example.com") = dynamic.string(email)
-  assert Ok(username) = dynamic.field(user_response, "username")
-  assert Ok("some_username") = dynamic.string(username)
+  assert Some(user_response) = json.fetch(data, "user")
+  assert Some(json.String(email)) = json.fetch(user_response, "email")
+  email
+  |> should.equal("user@example.com")
+  assert Some(json.String(username)) = json.fetch(user_response, "username")
+  username
+  |> should.equal("some_username")
 
   assert Ok(tuple(_, 1, [db_user])) =
     db.query("SELECT email, username FROM users", [])

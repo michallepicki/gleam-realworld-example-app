@@ -3,9 +3,8 @@ import gleam/pgo
 import gleam/option.{None, Option, Some}
 import gleam/regex
 import gleam/http.{Request, Response}
-import gleam/json
-import typed_json.{JsonObject, JsonString, TypedJson}
-import validation
+import conduit/json
+import conduit/validation
 import conduit/db
 
 type User {
@@ -19,7 +18,7 @@ type User {
 }
 
 pub fn registration(
-  request: Request(TypedJson),
+  request: Request(json.Json),
 ) -> Result(Response(String), Response(String)) {
   try RegistrationParams(user_email, _user_password, user_username) =
     read_registration_params(request.body)
@@ -40,15 +39,15 @@ pub fn registration(
     )
 
   let user_response =
-    json.object([
-      tuple(
+    json.Object([
+      json.Field(
         "user",
-        json.object([
-          tuple("email", json.string(user.email)),
-          tuple("token", json.string(user.token)),
-          tuple("username", json.string(user.username)),
-          tuple("bio", json.null()),
-          tuple("image", json.null()),
+        json.Object([
+          json.Field("email", json.String(user.email)),
+          json.Field("token", json.String(user.token)),
+          json.Field("username", json.String(user.username)),
+          json.Field("bio", json.Null),
+          json.Field("image", json.Null),
         ]),
       ),
     ])
@@ -60,12 +59,12 @@ pub fn registration(
 }
 
 fn read_registration_params(
-  registration_json: TypedJson,
+  registration_json: json.Json,
 ) -> Result(RegistrationParams, Response(String)) {
   // What errors should be returned, exactly? This is not well-defined in the in realworld API spec
-  let validated_params = case typed_json.object_fetch(registration_json, "user") {
+  let validated_params = case json.fetch(registration_json, "user") {
     Some(user_json) -> validate_registration_fields(user_json)
-    None -> validate_registration_fields(JsonObject([]))
+    None -> validate_registration_fields(json.Object([]))
   }
   case validated_params {
     Ok(registration_params) -> Ok(registration_params)
@@ -79,7 +78,7 @@ fn read_registration_params(
 }
 
 fn validate_registration_fields(
-  user_json: TypedJson,
+  user_json: json.Json,
 ) -> Result(RegistrationParams, validation.Errors) {
   registration_params_builder()
   |> validation.apply(validate_registration_email(user_json))
@@ -103,10 +102,10 @@ fn registration_params_builder() {
 }
 
 fn validate_registration_email(
-  user_json: TypedJson,
+  user_json: json.Json,
 ) -> Result(String, validation.Errors) {
-  case typed_json.object_fetch(user_json, "email") {
-    Some(JsonString(email)) -> {
+  case json.fetch(user_json, "email") {
+    Some(json.String(email)) -> {
       assert Ok(email_regex) = regex.from_string("^[^@]+@[^@]+$")
       case regex.check(email_regex, email) {
         True -> Ok(email)
@@ -119,10 +118,10 @@ fn validate_registration_email(
 }
 
 fn validate_registration_password(
-  user_json: TypedJson,
+  user_json: json.Json,
 ) -> Result(String, validation.Errors) {
-  case typed_json.object_fetch(user_json, "password") {
-    Some(JsonString(password)) ->
+  case json.fetch(user_json, "password") {
+    Some(json.String(password)) ->
       case string.length(password) {
         length if length >= 8 -> Ok(password)
         _ -> Error([tuple("password", ["must be at least 8 characters long"])])
@@ -133,10 +132,10 @@ fn validate_registration_password(
 }
 
 fn validate_registration_username(
-  user_json: TypedJson,
+  user_json: json.Json,
 ) -> Result(String, validation.Errors) {
-  case typed_json.object_fetch(user_json, "username") {
-    Some(JsonString(username)) ->
+  case json.fetch(user_json, "username") {
+    Some(json.String(username)) ->
       // assert Ok(username_regex) = regex.from_string("^\S{1,20}$")
       // case regex.check(username_regex, username) {
       //   True -> Ok(username)

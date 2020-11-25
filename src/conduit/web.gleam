@@ -1,7 +1,7 @@
 import gleam/http.{Request, Response}
 import gleam/bit_string
 import gleam/bit_builder.{BitBuilder}
-import typed_json
+import conduit/json
 import conduit/user
 
 pub fn service(request: Request(BitString)) -> Response(BitBuilder) {
@@ -53,8 +53,8 @@ fn check_utf8_encoding(
 
 fn parse_json(
   request: Request(String),
-) -> Result(Request(typed_json.TypedJson), Response(String)) {
-  case typed_json.decode(request.body) {
+) -> Result(Request(json.Json), Response(String)) {
+  case json.decode(request.body) {
     Ok(json) ->
       request
       |> http.set_req_body(json)

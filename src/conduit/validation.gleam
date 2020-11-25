@@ -1,6 +1,6 @@
 import gleam/list
 import gleam/string
-import gleam/json
+import conduit/json
 
 pub type Errors =
   List(tuple(String, List(String)))
@@ -13,18 +13,18 @@ pub fn apply(
 }
 
 pub fn errors_json(errors: Errors) -> String {
-  json.object([
-    tuple(
+  json.Object([
+    json.Field(
       "errors",
-      json.object(
+      json.Object(
         errors
         |> list.map(fn(field_errors) {
-          let tuple(field, errors_list) = field_errors
-          tuple(
-            field,
-            json.list(list.map(
+          let tuple(error_key, errors_list) = field_errors
+          json.Field(
+            error_key,
+            json.Array(list.map(
               errors_list,
-              fn(error_string) { json.string(error_string) },
+              fn(error_string) { json.String(error_string) },
             )),
           )
         }),
