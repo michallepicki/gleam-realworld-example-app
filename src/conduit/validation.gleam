@@ -12,7 +12,7 @@ pub fn apply(
   apply_result(builder, result, errors_joiner)
 }
 
-pub fn errors_json(errors: Errors) -> String {
+pub fn errors_json(errors: Errors) -> json.Json {
   json.Object([
     json.Field(
       "errors",
@@ -31,7 +31,6 @@ pub fn errors_json(errors: Errors) -> String {
       ),
     ),
   ])
-  |> json.encode()
 }
 
 fn apply_result(

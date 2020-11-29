@@ -1,7 +1,10 @@
 import gleam/atom
 import gleam/list
 import gleam/map
+import gleam/int
+import gleam/float
 import gleam/string
+import gleam/bit_builder.{BitBuilder}
 import gleam/dynamic.{Dynamic}
 import gleam/option.{None, Option, Some}
 import conduit/json/jsone_wrapper
@@ -20,9 +23,49 @@ pub type Field {
   Field(k: String, v: Json)
 }
 
-pub fn encode(value: Json) -> String {
-  assert Ok(encoded) = jsone_wrapper.encode(remove_type_tags(value))
-  encoded
+pub fn encode(value: Json) -> BitBuilder {
+  case value {
+    Null -> bit_builder.from_string("null")
+    Bool(True) -> bit_builder.from_string("true")
+    Bool(False) -> bit_builder.from_string("false")
+    Int(v) -> bit_builder.from_string(int.to_string(v))
+    Float(v) -> bit_builder.from_string(float.to_string(v))
+    String(v) -> encode_string(v)
+    Array([]) -> bit_builder.from_string("[]")
+    Array([first, ..rest]) ->
+      bit_builder.from_string("]")
+      |> bit_builder.prepend_builder(
+        rest
+        |> list.map(fn(next) { bit_builder.prepend(encode(next), <<",":utf8>>) })
+        |> bit_builder.concat,
+      )
+      |> bit_builder.prepend_builder(encode(first))
+      |> bit_builder.prepend(<<"[":utf8>>)
+    Object([]) -> bit_builder.from_string("{}")
+    Object([first, ..rest]) ->
+      bit_builder.from_string("}")
+      |> bit_builder.prepend_builder(
+        rest
+        |> list.map(fn(next) {
+          bit_builder.prepend(encode_field(next), <<",":utf8>>)
+        })
+        |> bit_builder.concat,
+      )
+      |> bit_builder.prepend_builder(encode_field(first))
+      |> bit_builder.prepend(<<"{":utf8>>)
+  }
+}
+
+fn encode_field(field: Field) -> BitBuilder {
+  let Field(key, value) = field
+  encode(value)
+  |> bit_builder.prepend(<<":":utf8>>)
+  |> bit_builder.prepend_builder(encode_string(key))
+}
+
+fn encode_string(val: String) -> BitBuilder {
+  assert Ok(encoded) = jsone_wrapper.encode(dynamic.from(val))
+  bit_builder.from_string(encoded)
 }
 
 pub fn decode(data: String) -> Result(Json, Dynamic) {
@@ -90,25 +133,6 @@ fn add_type_tags(data: Dynamic) -> Json {
               }
           }
       }
-  }
-}
-
-fn remove_type_tags(json_value: Json) -> Dynamic {
-  case json_value {
-    Null -> dynamic.unsafe_coerce(dynamic.from(Null))
-    Bool(v) -> dynamic.unsafe_coerce(dynamic.from(v))
-    Int(v) -> dynamic.unsafe_coerce(dynamic.from(v))
-    Float(v) -> dynamic.unsafe_coerce(dynamic.from(v))
-    String(v) -> dynamic.unsafe_coerce(dynamic.from(v))
-    Array(v) -> dynamic.unsafe_coerce(dynamic.from(v))
-    Object(v) ->
-      v
-      |> list.map(fn(field) {
-        let Field(key, value) = field
-        tuple(key, remove_type_tags(value))
-      })
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
   }
 }
 

@@ -11,12 +11,11 @@ pub fn service(request: Request(BitString)) -> Response(BitBuilder) {
   }
 
   response
-  |> http.map_resp_body(bit_builder.from_string)
 }
 
 fn router(
   request: Request(BitString),
-) -> Result(Response(String), Response(String)) {
+) -> Result(Response(BitBuilder), Response(BitBuilder)) {
   let path_segments = http.path_segments(request)
   case request.method, path_segments {
     http.Post, ["api", "users"] -> {
@@ -28,15 +27,15 @@ fn router(
   }
 }
 
-fn not_found() -> Result(Response(String), Response(String)) {
+fn not_found() -> Result(Response(BitBuilder), Response(BitBuilder)) {
   http.response(404)
-  |> http.set_resp_body("Not found")
+  |> http.set_resp_body(bit_builder.from_string("Not found"))
   |> Error()
 }
 
 fn check_utf8_encoding(
   request: Request(BitString),
-) -> Result(Request(String), Response(String)) {
+) -> Result(Request(String), Response(BitBuilder)) {
   case bit_string.to_string(request.body) {
     Ok(body) ->
       request
@@ -44,16 +43,16 @@ fn check_utf8_encoding(
       |> Ok()
     Error(_) ->
       http.response(400)
-      |> http.set_resp_body(
+      |> http.set_resp_body(bit_builder.from_string(
         "Could not read the request body: make sure the body of your request is a valid UTF-8 string",
-      )
+      ))
       |> Error()
   }
 }
 
 fn parse_json(
   request: Request(String),
-) -> Result(Request(json.Json), Response(String)) {
+) -> Result(Request(json.Json), Response(BitBuilder)) {
   case json.decode(request.body) {
     Ok(json) ->
       request
@@ -61,7 +60,9 @@ fn parse_json(
       |> Ok()
     Error(_) ->
       http.response(400)
-      |> http.set_resp_body("Could not parse the json body")
+      |> http.set_resp_body(bit_builder.from_string(
+        "Could not parse the json body",
+      ))
       |> Error()
   }
 }

@@ -1,4 +1,5 @@
 import gleam/string
+import gleam/bit_builder.{BitBuilder}
 import gleam/pgo
 import gleam/option.{None, Option, Some}
 import gleam/regex
@@ -19,7 +20,7 @@ type User {
 
 pub fn registration(
   request: Request(json.Json),
-) -> Result(Response(String), Response(String)) {
+) -> Result(Response(BitBuilder), Response(BitBuilder)) {
   try RegistrationParams(user_email, _user_password, user_username) =
     read_registration_params(request.body)
 
@@ -60,7 +61,7 @@ pub fn registration(
 
 fn read_registration_params(
   registration_json: json.Json,
-) -> Result(RegistrationParams, Response(String)) {
+) -> Result(RegistrationParams, Response(BitBuilder)) {
   // What errors should be returned, exactly? This is not well-defined in the in realworld API spec
   let validated_params = case json.fetch(registration_json, "user") {
     Some(user_json) -> validate_registration_fields(user_json)
@@ -69,7 +70,7 @@ fn read_registration_params(
   case validated_params {
     Ok(registration_params) -> Ok(registration_params)
     Error(errors) -> {
-      let errors_response = validation.errors_json(errors)
+      let errors_response = json.encode(validation.errors_json(errors))
       http.response(422)
       |> http.set_resp_body(errors_response)
       |> Error()
