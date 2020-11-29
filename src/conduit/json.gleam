@@ -1,10 +1,10 @@
-import gleam/json as gleam_json
 import gleam/atom
 import gleam/list
 import gleam/map
 import gleam/string
 import gleam/dynamic.{Dynamic}
 import gleam/option.{None, Option, Some}
+import conduit/json/jsone_wrapper
 
 pub type Json {
   Null
@@ -20,20 +20,16 @@ pub type Field {
   Field(k: String, v: Json)
 }
 
-external fn jsone_encode(Dynamic) -> Result(String, Dynamic) =
-  "jsone_encode" "encode"
-
-pub fn encode(json_value: Json) -> String {
-  assert Ok(encoded) =
-    json_value
-    |> remove_type_tags
-    |> jsone_encode
+pub fn encode(value: Json) -> String {
+  assert Ok(encoded) = jsone_wrapper.encode(remove_type_tags(value))
   encoded
 }
 
 pub fn decode(data: String) -> Result(Json, Dynamic) {
-  try json_data = gleam_json.decode(data)
-  Ok(type_json_data(dynamic.from(json_data)))
+  case jsone_wrapper.decode(data) {
+    jsone_wrapper.Ok(value, _rest) -> Ok(add_type_tags(value))
+    jsone_wrapper.Error(error) -> Error(error)
+  }
 }
 
 pub fn fetch(json_object: Json, key: String) -> Option(Json) {
@@ -56,7 +52,7 @@ fn filter_object(json_object: Json, keys: List(String)) -> Json {
   }
 }
 
-fn type_json_data(data: Dynamic) -> Json {
+fn add_type_tags(data: Dynamic) -> Json {
   case dynamic.atom(data) {
     Ok(an_atom) ->
       case atom.to_string(an_atom) {
@@ -75,7 +71,7 @@ fn type_json_data(data: Dynamic) -> Json {
                 Ok(a_string) -> String(a_string)
                 Error(_) ->
                   case dynamic.list(data) {
-                    Ok(a_list) -> Array(list.map(a_list, type_json_data))
+                    Ok(a_list) -> Array(list.map(a_list, add_type_tags))
                     Error(_) ->
                       case dynamic.map(data) {
                         Ok(a_map) ->
@@ -85,7 +81,7 @@ fn type_json_data(data: Dynamic) -> Json {
                             |> list.map(fn(field) {
                               let tuple(key, value) = field
                               assert Ok(string_key) = dynamic.string(key)
-                              Field(string_key, type_json_data(value))
+                              Field(string_key, add_type_tags(value))
                             })
                             |> ensure_keys_sorted,
                           )
@@ -99,31 +95,12 @@ fn type_json_data(data: Dynamic) -> Json {
 
 fn remove_type_tags(json_value: Json) -> Dynamic {
   case json_value {
-    Null ->
-      Null
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
-    Bool(v) ->
-      v
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
-    Int(v) ->
-      v
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
-    Float(v) ->
-      v
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
-    String(v) ->
-      v
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
-    Array(v) ->
-      v
-      |> list.map(remove_type_tags)
-      |> dynamic.from()
-      |> dynamic.unsafe_coerce()
+    Null -> dynamic.unsafe_coerce(dynamic.from(Null))
+    Bool(v) -> dynamic.unsafe_coerce(dynamic.from(v))
+    Int(v) -> dynamic.unsafe_coerce(dynamic.from(v))
+    Float(v) -> dynamic.unsafe_coerce(dynamic.from(v))
+    String(v) -> dynamic.unsafe_coerce(dynamic.from(v))
+    Array(v) -> dynamic.unsafe_coerce(dynamic.from(v))
     Object(v) ->
       v
       |> list.map(fn(field) {
