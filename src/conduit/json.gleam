@@ -20,10 +20,15 @@ pub type Field {
   Field(k: String, v: Json)
 }
 
+external fn jsone_encode(Dynamic) -> Result(String, Dynamic) =
+  "jsone_encode" "encode"
+
 pub fn encode(json_value: Json) -> String {
-  json_value
-  |> untype_json_value
-  |> gleam_json.encode
+  assert Ok(encoded) =
+    json_value
+    |> remove_type_tags
+    |> jsone_encode
+  encoded
 }
 
 pub fn decode(data: String) -> Result(Json, Dynamic) {
@@ -92,25 +97,41 @@ fn type_json_data(data: Dynamic) -> Json {
   }
 }
 
-fn untype_json_value(json_value: Json) -> gleam_json.Json {
+fn remove_type_tags(json_value: Json) -> Dynamic {
   case json_value {
-    Null -> gleam_json.null()
-    Bool(v) -> gleam_json.bool(v)
-    Int(v) -> gleam_json.int(v)
+    Null ->
+      Null
+      |> dynamic.from()
+      |> dynamic.unsafe_coerce()
+    Bool(v) ->
+      v
+      |> dynamic.from()
+      |> dynamic.unsafe_coerce()
+    Int(v) ->
+      v
+      |> dynamic.from()
+      |> dynamic.unsafe_coerce()
     Float(v) ->
       v
       |> dynamic.from()
       |> dynamic.unsafe_coerce()
-    String(v) -> gleam_json.string(v)
-    Array(v) -> gleam_json.list(list.map(v, untype_json_value))
+    String(v) ->
+      v
+      |> dynamic.from()
+      |> dynamic.unsafe_coerce()
+    Array(v) ->
+      v
+      |> list.map(remove_type_tags)
+      |> dynamic.from()
+      |> dynamic.unsafe_coerce()
     Object(v) ->
-      gleam_json.object(list.map(
-        v,
-        fn(field) {
-          let Field(key, value) = field
-          tuple(key, untype_json_value(value))
-        },
-      ))
+      v
+      |> list.map(fn(field) {
+        let Field(key, value) = field
+        tuple(key, remove_type_tags(value))
+      })
+      |> dynamic.from()
+      |> dynamic.unsafe_coerce()
   }
 }
 
