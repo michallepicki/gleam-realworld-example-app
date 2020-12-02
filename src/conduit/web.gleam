@@ -5,12 +5,9 @@ import conduit/json
 import conduit/user
 
 pub fn service(request: Request(BitString)) -> Response(BitBuilder) {
-  let response = case router(request) {
-    Ok(response) -> response
-    Error(response) -> response
+  case router(request) {
+    Ok(response) | Error(response) -> response
   }
-
-  response
 }
 
 fn router(
