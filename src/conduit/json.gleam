@@ -12,7 +12,7 @@ import conduit/json/jsone_wrapper
 pub type Json {
   Null
   Bool(v: Bool)
-  Float(v: Float)
+  Number(v: Float)
   String(v: String)
   Array(v: List(Json))
   Object(v: List(Field))
@@ -27,7 +27,7 @@ pub fn encode(value: Json) -> BitBuilder {
     Null -> bit_builder.from_string("null")
     Bool(True) -> bit_builder.from_string("true")
     Bool(False) -> bit_builder.from_string("false")
-    Float(v) -> bit_builder.from_string(float.to_string(v))
+    Number(v) -> bit_builder.from_string(float.to_string(v))
     String(v) -> encode_string(v)
     Array([]) -> bit_builder.from_string("[]")
     Array([first, ..rest]) ->
@@ -102,32 +102,31 @@ fn add_type_tags(data: Dynamic) -> Json {
         "null" -> Null
       }
     Error(_) ->
+      case dynamic.float(data) {
+        Ok(a_float) -> Number(a_float)
         Error(_) ->
-          case dynamic.float(data) {
-            Ok(a_float) -> Float(a_float)
+          case dynamic.string(data) {
+            Ok(a_string) -> String(a_string)
             Error(_) ->
-              case dynamic.string(data) {
-                Ok(a_string) -> String(a_string)
+              case dynamic.list(data) {
+                Ok(a_list) -> Array(list.map(a_list, add_type_tags))
                 Error(_) ->
-                  case dynamic.list(data) {
-                    Ok(a_list) -> Array(list.map(a_list, add_type_tags))
-                    Error(_) ->
-                      case dynamic.map(data) {
-                        Ok(a_map) ->
-                          Object(
-                            a_map
-                            |> map.to_list()
-                            |> list.map(fn(field) {
-                              let tuple(key, value) = field
-                              assert Ok(string_key) = dynamic.string(key)
-                              Field(string_key, add_type_tags(value))
-                            })
-                            |> ensure_keys_sorted,
-                          )
-                      }
+                  case dynamic.map(data) {
+                    Ok(a_map) ->
+                      Object(
+                        a_map
+                        |> map.to_list()
+                        |> list.map(fn(field) {
+                          let tuple(key, value) = field
+                          assert Ok(string_key) = dynamic.string(key)
+                          Field(string_key, add_type_tags(value))
+                        })
+                        |> ensure_keys_sorted,
+                      )
                   }
               }
           }
+      }
   }
 }
 
