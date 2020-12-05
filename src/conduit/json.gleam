@@ -30,35 +30,36 @@ pub fn encode(value: Json) -> BitBuilder {
     Number(v) -> bit_builder.from_string(float.to_string(v))
     String(v) -> encode_string(v)
     Array([]) -> bit_builder.from_string("[]")
-    Array([first, ..rest]) ->
-      bit_builder.from_string("]")
-      |> bit_builder.prepend_builder(
-        rest
-        |> list.map(fn(next) { bit_builder.prepend(encode(next), <<",":utf8>>) })
-        |> bit_builder.concat,
-      )
-      |> bit_builder.prepend_builder(encode(first))
-      |> bit_builder.prepend(<<"[":utf8>>)
+    Array([first, ..rest]) -> {
+      let right =
+        list.fold(
+          list.reverse(rest),
+          [bit_builder.from_string("]")],
+          fn(next, acc) { [bit_builder.from_string(","), encode(next), ..acc] },
+        )
+      [bit_builder.from_string("["), encode(first), ..right]
+      |> bit_builder.concat
+    }
     Object([]) -> bit_builder.from_string("{}")
-    Object([first, ..rest]) ->
-      bit_builder.from_string("}")
-      |> bit_builder.prepend_builder(
-        rest
-        |> list.map(fn(next) {
-          bit_builder.prepend(encode_field(next), <<",":utf8>>)
-        })
-        |> bit_builder.concat,
-      )
-      |> bit_builder.prepend_builder(encode_field(first))
-      |> bit_builder.prepend(<<"{":utf8>>)
+    Object([first, ..rest]) -> {
+      let right =
+        list.fold(
+          list.reverse(rest),
+          [bit_builder.from_string("}")],
+          fn(next, acc) {
+            [bit_builder.from_string(","), encode_field(next), ..acc]
+          },
+        )
+      [bit_builder.from_string("{"), encode_field(first), ..right]
+      |> bit_builder.concat
+    }
   }
 }
 
 fn encode_field(field: Field) -> BitBuilder {
   let Field(key, value) = field
-  encode(value)
-  |> bit_builder.prepend(<<":":utf8>>)
-  |> bit_builder.prepend_builder(encode_string(key))
+  [encode_string(key), bit_builder.from_string(":"), encode(value)]
+  |> bit_builder.concat
 }
 
 fn encode_string(val: String) -> BitBuilder {
