@@ -9,8 +9,6 @@ pub fn decode_simple_types_test() {
   |> should.equal(Ok(json.Bool(True)))
   json.decode("false")
   |> should.equal(Ok(json.Bool(False)))
-  json.decode("1337")
-  |> should.equal(Ok(json.Int(1337)))
   json.decode("1337.0")
   |> should.equal(Ok(json.Float(1337.0)))
   json.decode("\"Yup\"")

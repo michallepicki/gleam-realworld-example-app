@@ -12,7 +12,6 @@ import conduit/json/jsone_wrapper
 pub type Json {
   Null
   Bool(v: Bool)
-  Int(v: Int)
   Float(v: Float)
   String(v: String)
   Array(v: List(Json))
@@ -28,7 +27,6 @@ pub fn encode(value: Json) -> BitBuilder {
     Null -> bit_builder.from_string("null")
     Bool(True) -> bit_builder.from_string("true")
     Bool(False) -> bit_builder.from_string("false")
-    Int(v) -> bit_builder.from_string(int.to_string(v))
     Float(v) -> bit_builder.from_string(float.to_string(v))
     String(v) -> encode_string(v)
     Array([]) -> bit_builder.from_string("[]")
@@ -104,8 +102,6 @@ fn add_type_tags(data: Dynamic) -> Json {
         "null" -> Null
       }
     Error(_) ->
-      case dynamic.int(data) {
-        Ok(an_int) -> Int(an_int)
         Error(_) ->
           case dynamic.float(data) {
             Ok(a_float) -> Float(a_float)
@@ -132,7 +128,6 @@ fn add_type_tags(data: Dynamic) -> Json {
                   }
               }
           }
-      }
   }
 }
 
