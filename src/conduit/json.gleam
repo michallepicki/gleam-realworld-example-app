@@ -28,7 +28,7 @@ pub fn encode(value: Json) -> BitBuilder {
     Bool(True) -> bit_builder.from_string("true")
     Bool(False) -> bit_builder.from_string("false")
     Number(v) -> bit_builder.from_string(float.to_string(v))
-    String(v) -> encode_string(v)
+    String(v) -> escape_string(v)
     Array([]) -> bit_builder.from_string("[]")
     Array([first, ..rest]) -> {
       let right =
@@ -58,11 +58,11 @@ pub fn encode(value: Json) -> BitBuilder {
 
 fn encode_field(field: Field) -> BitBuilder {
   let Field(key, value) = field
-  [encode_string(key), bit_builder.from_string(":"), encode(value)]
+  [escape_string(key), bit_builder.from_string(":"), encode(value)]
   |> bit_builder.concat
 }
 
-fn encode_string(val: String) -> BitBuilder {
+fn escape_string(val: String) -> BitBuilder {
   assert Ok(encoded) = jsone_wrapper.encode(dynamic.from(val))
   bit_builder.from_string(encoded)
 }
