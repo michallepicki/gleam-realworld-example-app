@@ -13,7 +13,7 @@ fn init(children) {
     db.run_pool("conduit_dev")
   }))
   |> supervisor.add(supervisor.supervisor(fn(_args) {
-    elli.start(web.service, on_port: 3000)
+    elli.start(web.service, on_port: 4000)
   }))
 }
 

@@ -35,6 +35,8 @@ Run the app with access to the Erlang REPL:
 rebar3 shell
 ```
 
+The web service will be started at `localhost:4000`
+
 # Database credentials
 
 By default, the application will try to access `postgresql://postgres:postgres@localhost:5432`. You can customize this with:
