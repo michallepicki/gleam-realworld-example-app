@@ -1,13 +1,8 @@
-> ### WORK IN PROGRESS Gleam + Elli + PGO codebase containing real world examples (CRUD, auth, advanced patterns, etc) that WILL adhere to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
+> ### UNFINISHED (barely started) Gleam + Elli + PGO codebase containing real world examples (CRUD, auth, advanced patterns, etc) that was supposed to adhere to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
 This codebase was created to demonstrate a fully fledged fullstack application built with [Gleam](https://gleam.run) including CRUD operations, authentication, routing, pagination, and more. Some day, hopefully, this will be the case!
 
 For more information on how to this will work with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
-
-
-# How it works
-
-> TODO. It doesn't fully work yet!
 
 # Getting started
 
@@ -47,7 +42,7 @@ export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=postgres
 ```
 
-# TODO:
+# MISSING:
 - [ ] jwt tokens handling using the jose library
 - [ ] hashing passwords, configuring salt, document generating salt
 - [ ] build release in a separate github actions workflow, run integration tests against it (`test/run-api-tests.sh`)
@@ -55,4 +50,4 @@ export POSTGRES_PASSWORD=postgres
 - [ ] articles tags
 - [ ] following users
 
-... and many more. These are just examples of things missing. Feel free to send PRs for any of them, I'm doing this just to learn Gleam in my spare time so the more the merrier!
+... and many more. These are just examples of things missing. I was doing this just to learn Gleam in my spare time so only a few things were set up
