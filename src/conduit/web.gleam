@@ -9,36 +9,43 @@ import conduit/user
 
 pub fn service(request: Request(BitString)) -> Response(BitBuilder) {
   case router(request) {
-    Ok(response) | Error(response) -> http.prepend_resp_header(response, "access-control-allow-origin", "*")
+    Ok(response) | Error(response) ->
+      http.prepend_resp_header(response, "access-control-allow-origin", "*")
   }
 }
 
 fn router(
   request: Request(BitString),
 ) -> Result(Response(BitBuilder), Response(BitBuilder)) {
-  let path_segments = http.path_segments(request) |> io.debug |> drop_query()
+  let path_segments =
+    http.path_segments(request)
+    |> io.debug
+    |> drop_query()
   case request.method, path_segments {
-    http.Options, _ -> {
+    http.Options, _ ->
       http.response(200)
       |> http.set_resp_body(bit_builder.from_string(""))
-      |> http.prepend_resp_header("access-control-allow-methods", "OPTIONS, GET, POST")
+      |> http.prepend_resp_header(
+        "access-control-allow-methods",
+        "OPTIONS, GET, POST",
+      )
       |> Ok
-    }
-    http.Get, ["api", "user"] -> {
+    http.Get, ["api", "user"] ->
       http.response(200)
-      |> http.set_resp_body(bit_builder.from_string("{\"user\":{\"email\":\"user@example.com\",\"username\":\"username\",\"bio\":\"bio\",\"image\":\"image\",\"token\":\"token\"}}"))
+      |> http.set_resp_body(bit_builder.from_string(
+        "{\"user\":{\"email\":\"user@example.com\",\"username\":\"username\",\"bio\":\"bio\",\"image\":\"image\",\"token\":\"token\"}}",
+      ))
       |> Ok
-    }
-    http.Get, ["api", "articles"] -> {
+    http.Get, ["api", "articles"] ->
       http.response(200)
-      |> http.set_resp_body(bit_builder.from_string("{\"articles\":[],\"articlesCount\":0}"))
+      |> http.set_resp_body(bit_builder.from_string(
+        "{\"articles\":[],\"articlesCount\":0}",
+      ))
       |> Ok
-    }
-    http.Get, ["api", "tags"] -> {
+    http.Get, ["api", "tags"] ->
       http.response(200)
       |> http.set_resp_body(bit_builder.from_string("{\"tags\":[]}"))
       |> Ok
-    }
     http.Post, ["api", "users"] -> {
       try string_request = check_utf8_encoding(request)
       try json_request = parse_json(string_request)
@@ -55,12 +62,12 @@ fn drop_query(path_segments: List(String)) -> List(String) {
     |> list.split(1)
   case last_segment_list {
     [] -> []
-    [last_segment] -> {
+    [last_segment] ->
       case string.split_once(last_segment, "?") {
-        Ok(tuple(last_segment_without_query, _query)) -> list.reverse([last_segment_without_query, ..other_segments])
+        Ok(tuple(last_segment_without_query, _query)) ->
+          list.reverse([last_segment_without_query, ..other_segments])
         Error(Nil) -> path_segments
       }
-    }
   }
 }
 
